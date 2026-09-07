@@ -1,0 +1,33 @@
+name: Build Linux Binaries
+on:
+  push:
+    branches: [main]
+    paths: ['c-code/*.c']
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: sudo apt-get update && sudo apt-get install -y gcc libomp-dev
+      - name: Create bin directory
+        run: mkdir -p c-code/bin
+      - name: Compile Serial
+        run: gcc c-code/radix_serial.c -o c-code/bin/radix_serial -O2 -fopenmp -static -lm
+      - name: Compile Parallel
+        run: gcc c-code/radix_parallel.c -o c-code/bin/radix_parallel -O2 -fopenmp -static -lm
+      - name: Make executable
+        run: chmod +x c-code/bin/radix_serial c-code/bin/radix_parallel
+      - name: Test binaries
+        run: |
+          echo -e "8\n170,45,75,90,802,24,2,66" | ./c-code/bin/radix_serial
+          echo -e "8\n170,45,75,90,802,24,2,66" | ./c-code/bin/radix_parallel
+      - name: Commit binaries
+        run: |
+          git config user.name 'GitHub Actions'
+          git config user.email 'actions@github.com'
+          git add c-code/bin/
+          git diff --cached --quiet || git commit -m 'chore: update pre-compiled Linux binaries'
+          git push

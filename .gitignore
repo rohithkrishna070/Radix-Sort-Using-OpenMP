@@ -1,0 +1,34 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+client/dist/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# C compiled executables (local)
+c-code/*.exe
+c-code/*.o
+
+# Do NOT ignore c-code/bin/ - pre-compiled binaries needed for Vercel
+!c-code/bin/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Vercel
+.vercel/
