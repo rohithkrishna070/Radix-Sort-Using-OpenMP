@@ -6,6 +6,7 @@ const benchmarkRoutes = require('./routes/benchmark');
 const { getExecutablePath } = require('./services/runner');
 
 const app = express();
+const clientDistPath = path.resolve(__dirname, '../client/dist');
 
 // Middleware
 app.use(cors()); // Allow all origins for dev
@@ -18,6 +19,27 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 app.use('/api', benchmarkRoutes);
+
+// Serve the built React app from the same backend port when it has been built
+if (fs.existsSync(clientDistPath)) {
+  app.use(express.static(clientDistPath));
+
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) {
+      return next();
+    }
+
+    res.sendFile(path.join(clientDistPath, 'index.html'));
+  });
+} else {
+  app.get('*', (req, res) => {
+    if (req.path.startsWith('/api')) {
+      return res.status(404).json({ error: 'API route not found' });
+    }
+
+    res.status(404).send(`Frontend build not found. Run "cd ../client && npm run build" before starting the server.`);
+  });
+}
 
 // Global Error Handler
 app.use((err, req, res, next) => {
