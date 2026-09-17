@@ -9,6 +9,7 @@ const Benchmark = ({ onResult }) => {
   const [minVal, setMinVal] = useState('0');
   const [maxVal, setMaxVal] = useState('1000000');
   const [threads, setThreads] = useState('Auto');
+  const [customThreads, setCustomThreads] = useState('');
   
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -208,9 +209,9 @@ const Benchmark = ({ onResult }) => {
           {threadOptions.map(t => (
             <button
               key={t}
-              onClick={() => setThreads(t)}
+              onClick={() => { setThreads(t); setCustomThreads(''); }}
               className={`px-4 py-1.5 rounded-full text-sm transition ${
-                threads === t 
+                threads === t && customThreads === ''
                   ? 'bg-teal-600 text-white shadow-[0_0_10px_rgba(20,184,166,0.5)]' 
                   : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
               }`}
@@ -222,8 +223,12 @@ const Benchmark = ({ onResult }) => {
             <span className="text-gray-400 text-sm">Custom:</span>
             <input
               type="number"
-              value={threads !== 'Auto' && !['2','4','8'].includes(threads) ? threads : ''}
-              onChange={(e) => setThreads(e.target.value || 'Auto')}
+              value={customThreads}
+              onChange={(e) => {
+                const val = e.target.value;
+                setCustomThreads(val);
+                setThreads(val === '' ? 'Auto' : val);
+              }}
               min="1" max="64"
               placeholder="e.g. 16"
               className="w-20 bg-gray-900 border border-gray-600 rounded-lg p-1.5 text-white focus:outline-none focus:border-teal-500 text-sm"
