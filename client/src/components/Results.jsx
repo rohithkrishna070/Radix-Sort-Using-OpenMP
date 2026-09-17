@@ -33,7 +33,7 @@ const Results = ({ result }) => {
         <div className="bg-gray-900/80 border border-gray-700 rounded-lg p-4 flex flex-col">
           <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Input Size</div>
           <div className="text-2xl font-light text-white mt-auto">
-            {Number(result.size).toLocaleString()}
+            {Number(result.inputSize || result.size).toLocaleString()}
           </div>
         </div>
 
@@ -61,7 +61,7 @@ const Results = ({ result }) => {
         <div className="bg-gray-900/80 border border-gray-700 rounded-lg p-4 flex flex-col">
           <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Threads Used</div>
           <div className="text-2xl font-light text-teal-200 mt-auto">
-            {result.threads}
+            {result.threadsUsed || result.threads}
           </div>
         </div>
 
@@ -75,7 +75,7 @@ const Results = ({ result }) => {
         <div className="bg-gray-900/80 border border-gray-700 rounded-lg p-4 flex flex-col md:col-span-2 xl:col-span-2">
           <div className="text-gray-400 text-xs font-bold uppercase tracking-wider mb-1">Results Match</div>
           <div className="text-xl font-medium mt-auto flex items-center h-full">
-            {result.match ? (
+            {(result.resultsMatch !== undefined ? result.resultsMatch : result.match) ? (
               <span className="text-green-400 flex items-center gap-2">
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                 Yes, correctly sorted
@@ -100,19 +100,22 @@ const Results = ({ result }) => {
         </div>
       )}
 
-      {result.sortedOutput && (
+      {(result.serialSorted || result.sorted_array) && (
         <div className="mt-4 border border-gray-700 rounded-lg overflow-hidden">
           <button 
             onClick={() => setShowOutput(!showOutput)}
             className="w-full bg-gray-900/50 hover:bg-gray-800 p-3 text-left flex justify-between items-center transition"
           >
-            <span className="font-medium text-gray-300">View Sorted Output ({result.size} elements)</span>
+            <span className="font-medium text-gray-300">View Sorted Output ({Number(result.inputSize || result.size).toLocaleString()} elements)</span>
             <svg className={`w-5 h-5 text-gray-500 transform transition-transform ${showOutput ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
           </button>
           
           {showOutput && (
             <div className="p-4 bg-gray-950 max-h-60 overflow-y-auto font-mono text-sm text-gray-400 break-words">
-              {Array.isArray(result.sortedOutput) ? result.sortedOutput.join(', ') : result.sortedOutput}
+              {(() => {
+                const sorted = result.serialSorted || result.sorted_array;
+                return Array.isArray(sorted) ? sorted.join(', ') : sorted;
+              })()}
             </div>
           )}
         </div>

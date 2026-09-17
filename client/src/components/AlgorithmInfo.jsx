@@ -13,7 +13,7 @@ const InfoCard = ({ icon: Icon, title, description, color }) => (
 
 const AlgorithmInfo = () => {
   return (
-    <section id="algorithm" className="py-20 w-full bg-[#0f172a]">
+    <section className="py-20 w-full bg-[#0f172a]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-teal-400 inline-block mb-4">

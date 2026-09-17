@@ -7,7 +7,6 @@ import Comparison from './components/Comparison';
 import Benchmark from './components/Benchmark';
 import Results from './components/Results';
 import PerformanceChart from './components/PerformanceChart';
-import SourceCode from './components/SourceCode';
 import Footer from './components/Footer';
 
 function App() {
@@ -52,9 +51,6 @@ function App() {
           <PerformanceChart benchmarkResults={benchmarkResults} />
         </section>
 
-        <section id="source-code">
-          <SourceCode />
-        </section>
       </main>
 
       <Footer />

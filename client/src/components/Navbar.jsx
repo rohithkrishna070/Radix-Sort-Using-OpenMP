@@ -7,7 +7,6 @@ const navLinks = [
   { name: 'Visualizer', id: 'visualizer' },
   { name: 'Benchmark', id: 'benchmark' },
   { name: 'Performance', id: 'performance' },
-  { name: 'Source Code', id: 'source-code' },
 ];
 
 const Navbar = () => {

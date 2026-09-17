@@ -3,7 +3,7 @@ import { HiOutlineUser, HiOutlineUsers, HiInformationCircle } from 'react-icons/
 
 const Comparison = () => {
   return (
-    <section id="performance" className="py-20 w-full bg-[#1e293b]">
+    <section id="comparison" className="py-20 w-full bg-[#1e293b]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">

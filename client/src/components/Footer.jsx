@@ -1,6 +1,5 @@
 import React from 'react';
 import { SiReact, SiVite, SiTailwindcss, SiNodedotjs, SiExpress, SiC } from 'react-icons/si';
-import { HiCodeBracketSquare } from 'react-icons/hi2';
 
 const Footer = () => {
   return (
@@ -41,21 +40,6 @@ const Footer = () => {
                 <SiC className="w-6 h-6 text-gray-500 group-hover:text-[#A8B9CC] transition-colors" />
               </div>
             </div>
-          </div>
-
-          {/* Right: Links */}
-          <div className="flex flex-col items-center md:items-end">
-            <button 
-              id="source-code"
-              onClick={() => {
-                const el = document.getElementById('source-code');
-                if (el) el.scrollIntoView({ behavior: 'smooth' });
-              }}
-              className="flex items-center gap-2 text-sm text-gray-400 hover:text-cyan-400 transition-colors px-4 py-2 rounded-lg hover:bg-gray-800"
-            >
-              <HiCodeBracketSquare className="w-5 h-5" />
-              View Source Code
-            </button>
           </div>
 
         </div>
