@@ -4,6 +4,8 @@
   "installCommand": "cd client && npm install",
   "framework": null,
   "rewrites": [
+    { "source": "/api/logistics/simulate", "destination": "/api/logistics" },
+    { "source": "/api/logistics", "destination": "/api/logistics" },
     { "source": "/api/:path*", "destination": "/api/:path*" }
   ],
   "functions": {

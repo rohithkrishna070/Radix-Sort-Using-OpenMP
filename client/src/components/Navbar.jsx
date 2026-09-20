@@ -8,6 +8,7 @@ const navLinks = [
   { name: 'Comparison', id: 'comparison' },
   { name: 'Benchmark', id: 'benchmark' },
   { name: 'Performance', id: 'performance' },
+  { name: 'Amazon Logistics', id: 'amazon-logistics' },
 ];
 
 const Navbar = () => {

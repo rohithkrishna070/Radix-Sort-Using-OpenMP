@@ -3,6 +3,8 @@ const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
 const benchmarkRoutes = require('./routes/benchmark');
+const networkRoutes = require('./routes/network');
+const logisticsRoutes = require('./routes/logistics');
 const { getExecutablePath } = require('./services/runner');
 
 const app = express();
@@ -19,6 +21,8 @@ app.get('/api/health', (req, res) => {
 
 // Routes
 app.use('/api', benchmarkRoutes);
+app.use('/api/network', networkRoutes);
+app.use('/api/logistics', logisticsRoutes);
 
 // Serve the built React app from the same backend port when it has been built
 if (fs.existsSync(clientDistPath)) {

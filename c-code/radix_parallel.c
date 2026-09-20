@@ -4,8 +4,8 @@
 #include <omp.h>
 
 /* Find maximum element using OpenMP reduction */
-int getMaxParallel(int arr[], int n, int dynamic_sched) {
-    int max = arr[0];
+unsigned int getMaxParallel(unsigned int arr[], int n, int dynamic_sched) {
+    unsigned int max = arr[0];
     if (dynamic_sched) {
         #pragma omp parallel for reduction(max:max) schedule(dynamic, 1024)
         for (int i = 1; i < n; i++) {
@@ -25,13 +25,13 @@ int getMaxParallel(int arr[], int n, int dynamic_sched) {
 }
 
 /* Parallel LSD Radix Sort using STATIC scheduling */
-void radixSortStatic(int arr[], int n, int *threads_used) {
+void radixSortStatic(unsigned int arr[], int n, int *threads_used) {
     if (n <= 1) {
         *threads_used = 1;
         return;
     }
 
-    int max = getMaxParallel(arr, n, 0);
+    unsigned int max = getMaxParallel(arr, n, 0);
 
     int numThreads = 1;
     #pragma omp parallel
@@ -41,7 +41,7 @@ void radixSortStatic(int arr[], int n, int *threads_used) {
     }
     *threads_used = numThreads;
 
-    int *output = (int *)malloc(n * sizeof(int));
+    unsigned int *output = (unsigned int *)malloc(n * sizeof(unsigned int));
     int *localCount = (int *)malloc(numThreads * 10 * sizeof(int));
     int *startPosition = (int *)malloc(numThreads * 10 * sizeof(int));
     int totalCount[10];
@@ -52,7 +52,7 @@ void radixSortStatic(int arr[], int n, int *threads_used) {
         exit(1);
     }
 
-    for (long long exp = 1; max / exp > 0; exp *= 10) {
+    for (unsigned long long exp = 1; max / exp > 0; exp *= 10) {
         #pragma omp parallel num_threads(numThreads)
         {
             int threadId = omp_get_thread_num();
@@ -113,13 +113,13 @@ void radixSortStatic(int arr[], int n, int *threads_used) {
 }
 
 /* Parallel LSD Radix Sort using DYNAMIC scheduling */
-void radixSortDynamic(int arr[], int n, int *threads_used) {
+void radixSortDynamic(unsigned int arr[], int n, int *threads_used) {
     if (n <= 1) {
         *threads_used = 1;
         return;
     }
 
-    int max = getMaxParallel(arr, n, 1);
+    unsigned int max = getMaxParallel(arr, n, 1);
 
     int numThreads = 1;
     #pragma omp parallel
@@ -138,7 +138,7 @@ void radixSortDynamic(int arr[], int n, int *threads_used) {
 
     int numChunks = (n + chunkSize - 1) / chunkSize;
 
-    int *output = (int *)malloc(n * sizeof(int));
+    unsigned int *output = (unsigned int *)malloc(n * sizeof(unsigned int));
     int *chunkCount = (int *)calloc(numChunks * 10, sizeof(int));
     int *startPosition = (int *)malloc(numChunks * 10 * sizeof(int));
     int totalCount[10];
@@ -149,7 +149,7 @@ void radixSortDynamic(int arr[], int n, int *threads_used) {
         exit(1);
     }
 
-    for (long long exp = 1; max / exp > 0; exp *= 10) {
+    for (unsigned long long exp = 1; max / exp > 0; exp *= 10) {
         #pragma omp parallel num_threads(numThreads)
         {
             /* STEP 1: Dynamic chunk counting */
@@ -226,8 +226,8 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int *arr_static = (int *)malloc(n * sizeof(int));
-    int *arr_dynamic = (int *)malloc(n * sizeof(int));
+    unsigned int *arr_static = (unsigned int *)malloc(n * sizeof(unsigned int));
+    unsigned int *arr_dynamic = (unsigned int *)malloc(n * sizeof(unsigned int));
 
     if (arr_static == NULL || arr_dynamic == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
 
     for (int i = 0; i < n; i++) {
         /* Accepts spaces, newlines, and commas */
-        if (scanf("%d%*[, \t\n\r]", &arr_static[i]) != 1 || arr_static[i] < 0) {
+        if (scanf("%u%*[, \t\n\r]", &arr_static[i]) != 1) {
             fprintf(stderr, "Invalid input\n");
             free(arr_static);
             free(arr_dynamic);
@@ -294,10 +294,10 @@ int main(int argc, char *argv[]) {
     printf("THREADS:%d\n", threads_used);
 
     /* Output the sorted array */
-    int *finalSorted = runStatic ? arr_static : arr_dynamic;
+    unsigned int *finalSorted = runStatic ? arr_static : arr_dynamic;
     printf("SORTED:");
     for (int i = 0; i < n; i++) {
-        printf("%d", finalSorted[i]);
+        printf("%u", finalSorted[i]);
         if (i < n - 1) printf(",");
     }
     printf("\n");
