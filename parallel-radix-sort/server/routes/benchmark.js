@@ -5,8 +5,8 @@ const runner = require('../services/runner');
 
 router.post('/sort', validateSortInput, (req, res, next) => {
   try {
-    const { numbers, threads } = req.body;
-    const result = runner.runSort(numbers, threads);
+    const { numbers, threads, schedule } = req.body;
+    const result = runner.runSort(numbers, threads, schedule || 'both');
     
     // For small arrays (< 20 elements), include the sorted arrays in response
     // For larger arrays, only include first 100 elements of sorted output
@@ -27,12 +27,12 @@ router.post('/sort', validateSortInput, (req, res, next) => {
 
 router.post('/benchmark', validateBenchmarkInput, (req, res, next) => {
   try {
-    const { size, min, max, threads } = req.body;
+    const { size, min, max, threads, schedule } = req.body;
     const arrayMin = min !== undefined ? min : 0;
     const arrayMax = max !== undefined ? max : 1000000;
     
     const numbers = runner.generateRandomArray(size, arrayMin, arrayMax);
-    const result = runner.runSort(numbers, threads);
+    const result = runner.runSort(numbers, threads, schedule || 'both');
     
     // Do NOT return sorted arrays for large benchmarks (too much data)
     delete result.serialSorted;

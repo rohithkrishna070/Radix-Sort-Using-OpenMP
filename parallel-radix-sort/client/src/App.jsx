@@ -51,6 +51,7 @@ function App() {
           <PerformanceChart benchmarkResults={benchmarkResults} />
         </section>
 
+
       </main>
 
       <Footer />

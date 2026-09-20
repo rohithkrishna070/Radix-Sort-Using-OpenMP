@@ -5,6 +5,7 @@ const navLinks = [
   { name: 'Home', id: 'hero' },
   { name: 'Algorithm', id: 'algorithm' },
   { name: 'Visualizer', id: 'visualizer' },
+  { name: 'Comparison', id: 'comparison' },
   { name: 'Benchmark', id: 'benchmark' },
   { name: 'Performance', id: 'performance' },
 ];

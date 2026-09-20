@@ -10,6 +10,7 @@ const Benchmark = ({ onResult }) => {
   const [maxVal, setMaxVal] = useState('1000000');
   const [threads, setThreads] = useState('Auto');
   const [customThreads, setCustomThreads] = useState('');
+  const [schedule, setSchedule] = useState('both'); // both, static, dynamic
   
   const [loading, setLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
@@ -53,14 +54,15 @@ const Benchmark = ({ onResult }) => {
         setError('Please enter some numbers');
         return;
       }
-      payload = { numbers, threads: actualThreads };
+      payload = { numbers, threads: actualThreads, schedule };
       endpoint = `${API_URL}/api/sort`;
     } else {
       payload = {
         size: parseInt(randomSize, 10),
         min: parseInt(minVal, 10) || 0,
         max: parseInt(maxVal, 10) || 1000000,
-        threads: actualThreads
+        threads: actualThreads,
+        schedule
       };
       endpoint = `${API_URL}/api/benchmark`;
     }
@@ -70,9 +72,10 @@ const Benchmark = ({ onResult }) => {
 
     // Simulate multi-step loading for UX
     const timers = [
-      setTimeout(() => setLoadingStep(2), 500), // Running Serial
-      setTimeout(() => setLoadingStep(3), 1500), // Running Parallel
-      setTimeout(() => setLoadingStep(4), 2500)  // Calculating
+      setTimeout(() => setLoadingStep(2), 400), // Running Serial
+      setTimeout(() => setLoadingStep(3), 1000), // Running Static OpenMP
+      setTimeout(() => setLoadingStep(4), 1800), // Running Dynamic OpenMP
+      setTimeout(() => setLoadingStep(5), 2600)  // Analyzing & Comparing
     ];
 
     try {
@@ -112,8 +115,9 @@ const Benchmark = ({ onResult }) => {
     '',
     'Preparing dataset...',
     'Running Serial Radix Sort (C)...',
-    'Running Parallel Radix Sort (OpenMP)...',
-    'Calculating results...'
+    'Running Static OpenMP Radix Sort...',
+    'Running Dynamic OpenMP Radix Sort...',
+    'Comparing Static vs Dynamic performance...'
   ];
 
   return (
@@ -234,6 +238,67 @@ const Benchmark = ({ onResult }) => {
               className="w-20 bg-gray-900 border border-gray-600 rounded-lg p-1.5 text-white focus:outline-none focus:border-teal-500 text-sm"
             />
           </div>
+        </div>
+      </div>
+
+      <div className="mb-8 p-4 bg-gray-900/60 border border-gray-700/60 rounded-xl">
+        <div className="flex justify-between items-center mb-2">
+          <label className="block text-sm font-semibold text-gray-200">OpenMP Scheduling Strategy:</label>
+          <span className="text-xs text-cyan-400 bg-cyan-950/80 px-2 py-0.5 rounded border border-cyan-800/60 font-medium">
+            Static vs Dynamic Comparison
+          </span>
+        </div>
+        <p className="text-xs text-gray-400 mb-3">
+          Select <strong className="text-cyan-300">Compare Both</strong> to test both strategies on your dataset and analyze why Static Scheduling provides superior performance for Radix Sort.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => setSchedule('both')}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left flex flex-col justify-between border ${
+              schedule === 'both'
+                ? 'bg-gradient-to-r from-cyan-900/70 to-teal-900/70 border-cyan-400 text-white shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                : 'bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700/80 hover:border-gray-600'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold">Compare Both</span>
+              <span className="text-[10px] bg-cyan-500/20 text-cyan-300 px-1.5 py-0.5 rounded uppercase font-semibold">Recommended</span>
+            </div>
+            <span className="text-[11px] text-gray-400 mt-1">Runs Static & Dynamic side-by-side</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSchedule('static')}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left flex flex-col justify-between border ${
+              schedule === 'static'
+                ? 'bg-cyan-900/60 border-cyan-400 text-white shadow-[0_0_12px_rgba(6,182,212,0.3)]'
+                : 'bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700/80 hover:border-gray-600'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold">Static Only</span>
+              <span className="text-[10px] bg-teal-500/20 text-teal-300 px-1.5 py-0.5 rounded font-mono">#pragma omp for schedule(static)</span>
+            </div>
+            <span className="text-[11px] text-gray-400 mt-1">Deterministic contiguous core partitioning</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setSchedule('dynamic')}
+            className={`px-4 py-2.5 rounded-lg text-sm font-medium transition-all text-left flex flex-col justify-between border ${
+              schedule === 'dynamic'
+                ? 'bg-purple-900/60 border-purple-400 text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]'
+                : 'bg-gray-800/80 border-gray-700 text-gray-300 hover:bg-gray-700/80 hover:border-gray-600'
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <span className="font-bold">Dynamic Only</span>
+              <span className="text-[10px] bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded font-mono">#pragma omp for schedule(dynamic)</span>
+            </div>
+            <span className="text-[11px] text-gray-400 mt-1">On-demand runtime work queue</span>
+          </button>
         </div>
       </div>
 

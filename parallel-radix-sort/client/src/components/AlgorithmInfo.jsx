@@ -49,8 +49,8 @@ const AlgorithmInfo = () => {
           />
           <InfoCard 
             icon={HiOutlineCubeTransparent}
-            title="Parallel with OpenMP"
-            description="Distributes the workload across multiple threads. Threads independently process chunks of the array during the counting phase, then prefix sums and scattering are synchronized."
+            title="OpenMP Loop Scheduling"
+            description="Parallel radix sort distributes digit counting and scattering across CPU cores. Static scheduling pre-assigns deterministic contiguous blocks to maximize L1/L2 cache locality, whereas dynamic scheduling relies on runtime queue dispatch."
             color="bg-rose-600/80 shadow-lg shadow-rose-600/20"
           />
           
