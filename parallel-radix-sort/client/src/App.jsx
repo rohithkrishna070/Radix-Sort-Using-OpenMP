@@ -7,6 +7,7 @@ import Comparison from './components/Comparison';
 import Benchmark from './components/Benchmark';
 import Results from './components/Results';
 import PerformanceChart from './components/PerformanceChart';
+import AmazonLogistics from './components/AmazonLogistics';
 import Footer from './components/Footer';
 
 function App() {
@@ -51,6 +52,9 @@ function App() {
           <PerformanceChart benchmarkResults={benchmarkResults} />
         </section>
 
+        <section id="amazon-logistics">
+          <AmazonLogistics />
+        </section>
 
       </main>
 

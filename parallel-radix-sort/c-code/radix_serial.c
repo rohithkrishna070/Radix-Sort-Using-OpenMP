@@ -3,8 +3,8 @@
 #include <omp.h>
 
 /* Find the maximum value in the array */
-int getMax(int arr[], int n) {
-    int max = arr[0];
+unsigned int getMax(unsigned int arr[], int n) {
+    unsigned int max = arr[0];
     for (int i = 1; i < n; i++) {
         if (arr[i] > max) max = arr[i];
     }
@@ -12,7 +12,7 @@ int getMax(int arr[], int n) {
 }
 
 /* Perform Counting Sort based on the current digit position */
-void countingSort(int arr[], int n, long long exp, int *output) {
+void countingSort(unsigned int arr[], int n, unsigned long long exp, unsigned int *output) {
     int count[10] = {0};
 
     for (int i = 0; i < n; i++) {
@@ -37,17 +37,17 @@ void countingSort(int arr[], int n, long long exp, int *output) {
 }
 
 /* LSD Radix Sort */
-void radixSort(int arr[], int n) {
+void radixSort(unsigned int arr[], int n) {
     if (n <= 1) return;
-    int max = getMax(arr, n);
+    unsigned int max = getMax(arr, n);
 
-    int *output = (int *)malloc(n * sizeof(int));
+    unsigned int *output = (unsigned int *)malloc(n * sizeof(unsigned int));
     if (output == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         exit(1);
     }
 
-    for (long long exp = 1; max / exp > 0; exp *= 10) {
+    for (unsigned long long exp = 1; max / exp > 0; exp *= 10) {
         countingSort(arr, n, exp, output);
     }
 
@@ -61,7 +61,7 @@ int main() {
         return 1;
     }
 
-    int *arr = (int *)malloc(n * sizeof(int));
+    unsigned int *arr = (unsigned int *)malloc(n * sizeof(unsigned int));
     if (arr == NULL) {
         fprintf(stderr, "Memory allocation failed\n");
         return 1;
@@ -69,7 +69,7 @@ int main() {
 
     for (int i = 0; i < n; i++) {
         /* Accepts spaces, newlines, and commas */
-        if (scanf("%d%*[, \t\n\r]", &arr[i]) != 1 || arr[i] < 0) {
+        if (scanf("%u%*[, \t\n\r]", &arr[i]) != 1) {
             fprintf(stderr, "Invalid input\n");
             free(arr);
             return 1;
@@ -83,7 +83,7 @@ int main() {
     printf("TIME:%.9f\n", endTime - startTime);
     printf("SORTED:");
     for (int i = 0; i < n; i++) {
-        printf("%d", arr[i]);
+        printf("%u", arr[i]);
         if (i < n - 1) printf(",");
     }
     printf("\n");
