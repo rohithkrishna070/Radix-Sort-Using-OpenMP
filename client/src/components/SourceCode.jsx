@@ -489,11 +489,140 @@ function highlightLine(line) {
   return html;
 }
 
+const dynamicCode = `#include <stdio.h>
+#include <stdlib.h>
+#include <omp.h>
+
+/*
+    Parallel LSD Radix Sort using DYNAMIC scheduling.
+
+    Work is dynamically scheduled using #pragma omp for schedule(dynamic).
+    Notice that because dynamic scheduling hands chunks to threads on-demand,
+    threads do not retain cache locality across passes, and must contend for
+    chunk assignments via the OpenMP runtime task queue.
+*/
+
+int getMaxParallelDynamic(int arr[], int n)
+{
+    int max = arr[0];
+    #pragma omp parallel for reduction(max:max) schedule(dynamic, 1024)
+    for (int i = 1; i < n; i++)
+    {
+        if (arr[i] > max)
+        {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+void radixSortDynamic(int arr[], int n)
+{
+    int max = getMaxParallelDynamic(arr, n);
+    int numThreads = omp_get_max_threads();
+
+    /* Dynamic chunk size */
+    int chunkSize = 256;
+    if (chunkSize > n / (numThreads * 2)) chunkSize = n / (numThreads * 2);
+    if (chunkSize < 32) chunkSize = 32;
+    int numChunks = (n + chunkSize - 1) / chunkSize;
+
+    int *output = (int *)malloc(n * sizeof(int));
+    int *chunkCount = (int *)calloc(numChunks * 10, sizeof(int));
+    int *startPosition = (int *)malloc(numChunks * 10 * sizeof(int));
+    int totalCount[10];
+
+    for (long long exp = 1; max / exp > 0; exp *= 10)
+    {
+        #pragma omp parallel num_threads(numThreads)
+        {
+            /* STEP 1: Dynamically assign chunk counting */
+            #pragma omp for schedule(dynamic, 1)
+            for (int c = 0; c < numChunks; c++)
+            {
+                int startIdx = c * chunkSize;
+                int endIdx = (startIdx + chunkSize > n) ? n : startIdx + chunkSize;
+                int *count = &chunkCount[c * 10];
+                for (int d = 0; d < 10; d++) count[d] = 0;
+
+                for (int i = startIdx; i < endIdx; i++)
+                {
+                    int digit = (arr[i] / exp) % 10;
+                    count[digit]++;
+                }
+            }
+
+            /* STEP 2 & 3: Combine counts and compute dynamic offsets */
+            #pragma omp single
+            {
+                for (int d = 0; d < 10; d++) totalCount[d] = 0;
+                for (int c = 0; c < numChunks; c++)
+                {
+                    for (int d = 0; d < 10; d++)
+                    {
+                        totalCount[d] += chunkCount[c * 10 + d];
+                    }
+                }
+                for (int d = 1; d < 10; d++)
+                {
+                    totalCount[d] += totalCount[d - 1];
+                }
+                for (int d = 0; d < 10; d++)
+                {
+                    int pos = (d == 0) ? 0 : totalCount[d - 1];
+                    for (int c = 0; c < numChunks; c++)
+                    {
+                        startPosition[c * 10 + d] = pos;
+                        pos += chunkCount[c * 10 + d];
+                    }
+                }
+            }
+
+            /* STEP 4: Dynamically distribute chunk scattering */
+            #pragma omp for schedule(dynamic, 1)
+            for (int c = 0; c < numChunks; c++)
+            {
+                int startIdx = c * chunkSize;
+                int endIdx = (startIdx + chunkSize > n) ? n : startIdx + chunkSize;
+                int pos[10];
+                for (int d = 0; d < 10; d++)
+                {
+                    pos[d] = startPosition[c * 10 + d];
+                }
+
+                for (int i = startIdx; i < endIdx; i++)
+                {
+                    int digit = (arr[i] / exp) % 10;
+                    output[pos[digit]++] = arr[i];
+                }
+            }
+
+            /* STEP 5: Copy back using dynamic schedule */
+            #pragma omp for schedule(dynamic, 1024)
+            for (int i = 0; i < n; i++)
+            {
+                arr[i] = output[i];
+            }
+        }
+    }
+
+    free(output);
+    free(chunkCount);
+    free(startPosition);
+}
+`;
+
 const SourceCode = () => {
-  const [activeTab, setActiveTab] = useState('serial');
+  const [activeTab, setActiveTab] = useState('static'); // serial, static, dynamic
   const [copied, setCopied] = useState(false);
 
-  const currentCode = activeTab === 'serial' ? serialCode : parallelCode;
+  const getCode = () => {
+    if (activeTab === 'serial') return serialCode;
+    if (activeTab === 'dynamic') return dynamicCode;
+    return parallelCode;
+  };
+
+  const currentCode = getCode();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(currentCode);
@@ -506,7 +635,7 @@ const SourceCode = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = activeTab === 'serial' ? 'radix_serial.c' : 'radix_parallel.c';
+    a.download = activeTab === 'serial' ? 'radix_serial.c' : (activeTab === 'dynamic' ? 'radix_dynamic.c' : 'radix_parallel_static.c');
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -518,26 +647,32 @@ const SourceCode = () => {
   return (
     <div className="py-20 px-4 max-w-6xl mx-auto">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-4 bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-500">
-        Source Code
+        C & OpenMP Source Code
       </h2>
       <p className="text-gray-400 text-center mb-10 max-w-2xl mx-auto">
-        View, copy, or download the complete C implementations used for benchmarking.
+        Inspect the actual C and OpenMP implementations: Serial, Static Scheduling, and Dynamic Scheduling.
       </p>
 
       <div className="bg-gray-800/50 backdrop-blur border border-gray-700/50 rounded-xl overflow-hidden shadow-2xl">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 border-b border-gray-700/50 gap-3">
-          <div className="flex gap-1 bg-gray-900 p-1 rounded-lg">
+          <div className="flex flex-wrap gap-1 bg-gray-900 p-1 rounded-lg">
             <button
               onClick={() => setActiveTab('serial')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${activeTab === 'serial' ? 'bg-cyan-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition ${activeTab === 'serial' ? 'bg-amber-700 text-white shadow' : 'text-gray-400 hover:text-white'}`}
             >
               Serial C Code
             </button>
             <button
-              onClick={() => setActiveTab('parallel')}
-              className={`px-4 py-2 rounded-md text-sm font-medium transition ${activeTab === 'parallel' ? 'bg-cyan-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+              onClick={() => setActiveTab('static')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition ${activeTab === 'static' ? 'bg-cyan-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
             >
-              Parallel OpenMP Code
+              OpenMP Static Code
+            </button>
+            <button
+              onClick={() => setActiveTab('dynamic')}
+              className={`px-3 py-2 rounded-md text-sm font-medium transition ${activeTab === 'dynamic' ? 'bg-purple-600 text-white shadow' : 'text-gray-400 hover:text-white'}`}
+            >
+              OpenMP Dynamic Code
             </button>
           </div>
 
