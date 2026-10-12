@@ -72,10 +72,11 @@ const Benchmark = ({ onResult }) => {
 
     // Simulate multi-step loading for UX
     const timers = [
-      setTimeout(() => setLoadingStep(2), 400), // Running Serial
-      setTimeout(() => setLoadingStep(3), 1000), // Running Static OpenMP
-      setTimeout(() => setLoadingStep(4), 1800), // Running Dynamic OpenMP
-      setTimeout(() => setLoadingStep(5), 2600)  // Analyzing & Comparing
+      setTimeout(() => setLoadingStep(2), 350), // Running Serial
+      setTimeout(() => setLoadingStep(3), 850), // Running Static OpenMP
+      setTimeout(() => setLoadingStep(4), 1400), // Running Dynamic OpenMP
+      setTimeout(() => setLoadingStep(5), 1950), // Running MPI Distributed
+      setTimeout(() => setLoadingStep(6), 2500)  // Analyzing 4-Way Architecture
     ];
 
     try {
@@ -117,7 +118,8 @@ const Benchmark = ({ onResult }) => {
     'Running Serial Radix Sort (C)...',
     'Running Static OpenMP Radix Sort...',
     'Running Dynamic OpenMP Radix Sort...',
-    'Comparing Static vs Dynamic performance...'
+    'Running MPI Distributed Radix Sort (Processes)...',
+    'Analyzing 4-Way Architecture Performance...'
   ];
 
   return (
