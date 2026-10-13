@@ -11,14 +11,15 @@ router.post('/', handleSimulate);
 
 function handleSimulate(req, res, next) {
   try {
-    const { count, threads, customPins } = req.body;
-    const numCount = parseInt(count, 10) || 50000;
-    const numThreads = parseInt(threads, 10) || 4;
+    const { count, datasetSize, threads, numThreads, customPins, clusterMode } = req.body || {};
+    const parsedCount = parseInt(count || datasetSize, 10) || 50000;
+    const parsedThreads = parseInt(threads || numThreads, 10) || 4;
 
     const result = amazonLogistics.simulateAmazonSorting({
-      count: Math.min(Math.max(numCount, 5), 1000000),
-      threads: numThreads,
-      customPins
+      count: Math.min(Math.max(parsedCount, 5), 1000000),
+      threads: parsedThreads,
+      customPins,
+      clusterMode: Boolean(clusterMode)
     });
 
     res.json(result);
